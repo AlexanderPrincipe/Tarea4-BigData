@@ -28,22 +28,7 @@ def leer_df():
                    "SlidingTackle","GKDiving","GKHandling","GKKicking","GKPositioning","GKReflexes"])
 	return df
 
-def leer_df_categoricos():
-	conf = SparkConf().setAppName("Tarea4").setMaster("local")
-	sc = SparkContext(conf=conf)
 
-	sqlContext = SQLContext(sc)
-
-	# Leemos el CSV
-	rdd = sqlContext.read.csv("data.csv", header=True).rdd
-
-	rdd = rdd.map(
-		lambda x: ( int(x[0]), int(x[1]), 
-			int(x[2]) , int(x[3]), int(x[4]),
-			int(x[5]), int(x[6]), int(x[7]) , int(x[8]) ))
-	df = rdd.toDF(["sex","cp", "fbs", "restecg","exang","slope","ca","thal","target"])
-
-	return df
 
 def feature_selection(df):
 	assembler = VectorAssembler(
@@ -70,35 +55,6 @@ def feature_selection(df):
 		outputCol="selectedFeatures")
 	resultado = selector.fit(df).transform(df)
 	resultado.select("features", "selectedFeatures").show()
-
-def entrenamiento(df):
-	# Vectorizo
-	df = df.select("cp", "restecg", "thal", "target")
-	assembler = VectorAssembler(
-		inputCols=["cp","restecg","thal"],
-		outputCol="features")
-	df = assembler.transform(df)
-
-	# Dividir nuestro dataset
-	(training_df, test_df) = df.randomSplit([0.7, 0.3])
-
-	## ENTRENAMIENTO
-	entrenador = DecisionTreeClassifier(
-		labelCol="target", 
-		featuresCol="features")
-	pipeline = Pipeline(stages=[entrenador])
-	model = pipeline.fit(training_df)
-
-	predictions_df = model.transform(test_df)
-
-	evaluator = MulticlassClassificationEvaluator(
-		labelCol="target",
-		predictionCol="prediction",
-		metricName="accuracy")
-
-	exactitud = evaluator.evaluate(predictions_df)
-	print("Exactitud: {}".format(exactitud))
-
 
 def main():
 	df = leer_df()
