@@ -45,8 +45,7 @@ def leer_df_categoricos():
 
 def feature_selection(df):
 	assembler = VectorAssembler(
-		inputCols=["age","sex","cp","trestbps",
-					"chol", "fbs", 						"restecg","thalach","exang",
+		inputCols=["age","sex","cp","trestbps","chol", "fbs", "restecg","thalach","exang",
 					"oldpeak","slope","ca","thal"],
 		outputCol="features")
 	df = assembler.transform(df)
